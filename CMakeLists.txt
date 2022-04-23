@@ -51,7 +51,7 @@ endif ()
 if (WIN32)
     set(PLATFORM_SOURCES src/platform/render/win32_dx11.cpp src/platform/render/win32_dx11.h src/sys/audio_registers.h)
 endif ()
-add_executable(${PROJECT_NAME} ${PLATFORM_SOURCES} src/main.cpp src/core/Application.cpp src/core/Application.h src/platform/render.cpp src/platform/render.h src/sys/Processor.cpp src/sys/Processor.h src/sys/cpu_registers.h src/sys/Memory.cpp src/sys/Memory.h src/sys/CPU.cpp src/sys/CPU.h src/sys/Graphics.cpp src/sys/Graphics.h src/sys/Audio.cpp src/sys/Audio.h src/sys/Timer.cpp src/sys/Timer.h src/sys/Controls.cpp src/sys/Controls.h)
+add_executable(${PROJECT_NAME} ${PLATFORM_SOURCES} src/main.cpp src/core/Application.cpp src/core/Application.h src/platform/render.cpp src/platform/render.h src/sys/Processor.cpp src/sys/Processor.h src/sys/cpu_registers.h src/sys/Memory.cpp src/sys/Memory.h src/sys/CPU.cpp src/sys/CPU.h src/sys/Graphics.cpp src/sys/Graphics.h src/sys/Audio.cpp src/sys/Audio.h src/sys/Timer.cpp src/sys/Timer.h src/sys/Controls.cpp src/sys/Controls.h src/sys/Clock.cpp src/sys/Clock.h)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 23)
 
 # Link dependencies

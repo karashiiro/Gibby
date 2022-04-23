@@ -6,6 +6,7 @@
 #include "Graphics.h"
 #include "Audio.h"
 #include "Timer.h"
+#include "Clock.h"
 
 class Processor
 {
@@ -20,6 +21,7 @@ public:
 	Processor();
 	virtual ~Processor();
 private:
+	Clock *clock;
 	Memory *memory;
 	CPU *cpu;
 	Timer *timer;

@@ -2,6 +2,7 @@
 
 Processor::Processor()
 {
+	clock = new Clock();
 	memory = new Memory();
 	cpu = new CPU(*(interrupt_register *)(void *)(memory->GetMemory() + 0xFFFF), memory->GetMemory());
 	timer = new Timer(*(timer_registers *)(void *)(memory->GetMemory() + 0xFF05));
@@ -22,4 +23,5 @@ Processor::~Processor()
 	delete timer;
 	delete cpu;
 	delete memory;
+	delete clock;
 }
