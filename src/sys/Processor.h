@@ -3,6 +3,8 @@
 #include "registers.h"
 #include "CPU.h"
 #include "Memory.h"
+#include "Graphics.h"
+#include "Audio.h"
 
 class Processor
 {
@@ -19,4 +21,6 @@ public:
 private:
 	Memory *memory;
 	CPU *cpu;
+	Graphics *ppu;
+	Audio*apu;
 };

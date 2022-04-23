@@ -51,7 +51,7 @@ endif ()
 if (WIN32)
     set(PLATFORM_SOURCES src/platform/render/win32_dx11.cpp src/platform/render/win32_dx11.h)
 endif ()
-add_executable(${PROJECT_NAME} ${PLATFORM_SOURCES} src/main.cpp src/core/Application.cpp src/core/Application.h src/platform/render.cpp src/platform/render.h src/sys/Processor.cpp src/sys/Processor.h src/sys/registers.h src/sys/Memory.cpp src/sys/Memory.h src/sys/CPU.cpp src/sys/CPU.h)
+add_executable(${PROJECT_NAME} ${PLATFORM_SOURCES} src/main.cpp src/core/Application.cpp src/core/Application.h src/platform/render.cpp src/platform/render.h src/sys/Processor.cpp src/sys/Processor.h src/sys/registers.h src/sys/Memory.cpp src/sys/Memory.h src/sys/CPU.cpp src/sys/CPU.h src/sys/Graphics.cpp src/sys/Graphics.h src/sys/Audio.cpp src/sys/Audio.h)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 23)
 
 # Link dependencies
