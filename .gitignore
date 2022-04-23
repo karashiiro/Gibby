@@ -1,0 +1,9 @@
+# CMake
+cmake-build-*/
+
+# IntelliJ
+.idea/
+out/
+
+# Vcpkg
+vcpkg.exe
