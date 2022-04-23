@@ -1,15 +1,14 @@
 #pragma once
 
-#include "registers.h"
-#include "Memory.h"
+#include "cpu_registers.h"
 
 class CPU
 {
 public:
-	explicit CPU(Memory *external_memory);
+	explicit CPU(unsigned char *external_memory);
 private:
 	register_set registers{};
 	flag_register flags{};
 
-	Memory *memory;
+	unsigned char *memory;
 };

@@ -1,6 +1,6 @@
 #include "Graphics.h"
 
-Graphics::Graphics(Memory* external_memory)
+Graphics::Graphics(unsigned char* external_memory)
 {
-	vram = external_memory->GetVideoMemory();
+	vram = external_memory;
 }

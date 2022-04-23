@@ -7,7 +7,6 @@ public:
 	virtual ~Memory();
 
 	unsigned char* GetMemory();
-	unsigned char* GetVideoMemory();
 private:
 	/*
 	 * The SM83 only has 8KB of onboard RAM, but its memory

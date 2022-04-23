@@ -1,10 +1,11 @@
 #pragma once
 
-#include "registers.h"
+#include "cpu_registers.h"
 #include "CPU.h"
 #include "Memory.h"
 #include "Graphics.h"
 #include "Audio.h"
+#include "Timer.h"
 
 class Processor
 {
@@ -21,6 +22,7 @@ public:
 private:
 	Memory *memory;
 	CPU *cpu;
+	Timer *timer;
 	Graphics *ppu;
 	Audio*apu;
 };

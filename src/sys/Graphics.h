@@ -4,7 +4,7 @@
 class Graphics
 {
 public:
-	explicit Graphics(Memory *external_memory);
+	explicit Graphics(unsigned char *external_memory);
 private:
 	const int MEMORY_END = 0x2000;
 

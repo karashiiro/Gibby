@@ -14,8 +14,3 @@ unsigned char* Memory::GetMemory()
 {
 	return mem;
 }
-
-unsigned char* Memory::GetVideoMemory()
-{
-	return mem + 0x8000;
-}
