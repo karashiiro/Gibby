@@ -35,8 +35,8 @@ struct lcd_registers {
 	lcd_status_register status;
 	unsigned char scroll_y;
 	unsigned char scroll_x;
-	unsigned char lcd_y;
-	unsigned char lcd_y_compare;
+	unsigned char lcd_control_y;
+	unsigned char lcd_control_y_compare;
 	unsigned char dma;
 	lcd_palette_register bg_window_palette;
 	lcd_palette_register obj_palette_0;

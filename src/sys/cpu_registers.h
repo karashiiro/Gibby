@@ -41,6 +41,15 @@ struct flag_register {
 	unsigned char z : 1;
 };
 
+struct interrupt_register {
+	unsigned char v_blank        : 1;
+	unsigned char lcd_control    : 1;
+	unsigned char timer_overflow : 1;
+	unsigned char pin_transition : 1;
+	unsigned char : 4;
+};
+
 // Size assertions
 static_assert(sizeof(register_set) == 12, "CPU registers must span 12 bytes.");
 static_assert(sizeof(flag_register) == 1, "Flag register must span 1 byte.");
+static_assert(sizeof(interrupt_register) == 1, "Interrupt register must span 1 byte.");
