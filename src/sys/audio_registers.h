@@ -4,6 +4,12 @@
 // merging them into a short to avoid dealing with
 // field alignment.
 
+struct envelope_register {
+	unsigned char sweep : 3;
+	unsigned char inc   : 1;
+	unsigned char initial_volume : 4;
+};
+
 struct sound_mode_1_registers {
 	struct {
 		unsigned char shift : 3;
@@ -13,11 +19,7 @@ struct sound_mode_1_registers {
 	} sweep;
 	unsigned char length            : 6;
 	unsigned char wave_pattern_duty : 2;
-	struct {
-		unsigned char sweep : 3;
-		unsigned char inc   : 1;
-		unsigned char initial_volume : 4;
-	} envelope;
+	envelope_register envelope;
 	unsigned char freq_lo;
 	unsigned char freq_hi      : 3;
 	unsigned char counter_mode : 1;
@@ -27,11 +29,7 @@ struct sound_mode_1_registers {
 struct sound_mode_2_registers {
 	unsigned char length            : 6;
 	unsigned char wave_pattern_duty : 2;
-	struct {
-		unsigned char sweep : 3;
-		unsigned char inc   : 1;
-		unsigned char initial_volume : 4;
-	} envelope;
+	envelope_register envelope;
 	unsigned char freq_lo;
 	unsigned char freq_hi      : 3;
 	unsigned char counter_mode : 1;
@@ -53,11 +51,7 @@ struct sound_mode_3_registers {
 
 struct sound_mode_4_registers {
 	unsigned char length : 6;
-	struct {
-		unsigned char sweep : 3;
-		unsigned char inc   : 1;
-		unsigned char initial_volume : 4;
-	} envelope;
+	envelope_register envelope;
 	struct {
 		unsigned char freq       : 3;
 		unsigned char step       : 1;
@@ -98,6 +92,7 @@ struct sound_control_registers {
 typedef unsigned char wave_sample_memory[32];
 
 // Size assertions
+static_assert(sizeof(envelope_register) == 1, "Envelope register must span 1 byte.");
 static_assert(sizeof(sound_mode_1_registers) == 5, "Sound mode 1 registers must span 5 bytes.");
 static_assert(sizeof(sound_mode_2_registers) == 4, "Sound mode 2 registers must span 4 bytes.");
 static_assert(sizeof(sound_mode_3_registers) == 5, "Sound mode 3 registers must span 5 bytes.");
