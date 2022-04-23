@@ -16,3 +16,6 @@ public:
 private:
 	control_registers&registers;
 };
+
+// Size assertions
+static_assert(sizeof(control_registers) == 1, "Control register must span 1 byte.");
