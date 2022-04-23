@@ -34,7 +34,7 @@ struct register_set {
 };
 
 struct flag_register {
-	unsigned char unused : 4;
+	unsigned char : 4;
 	unsigned char c : 1;
 	unsigned char h : 1;
 	unsigned char n : 1;
