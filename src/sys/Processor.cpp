@@ -3,7 +3,7 @@
 Processor::Processor()
 {
 	memory = new Memory();
-	cpu = new CPU(memory->GetMemory());
+	cpu = new CPU(*(interrupt_register *)(void *)(memory->GetMemory() + 0xFFFF), memory->GetMemory());
 	timer = new Timer(*(timer_registers *)(void *)(memory->GetMemory() + 0xFF05));
 	ppu = new Graphics(*(lcd_registers *)(void *)(memory->GetMemory() + 0xFF40), memory->GetMemory() + 0x8000);
 	apu = new Audio(
