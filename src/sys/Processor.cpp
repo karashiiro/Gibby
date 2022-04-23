@@ -5,7 +5,7 @@ Processor::Processor()
 	memory = new Memory();
 	cpu = new CPU(memory->GetMemory());
 	timer = new Timer(*(timer_registers *)(void *)(memory->GetMemory() + 0xFF05));
-	ppu = new Graphics(memory->GetMemory() + 0x8000);
+	ppu = new Graphics(*(lcd_registers *)(void *)(memory->GetMemory() + 0xFF40), memory->GetMemory() + 0x8000);
 	apu = new Audio(
 			*(sound_mode_1_registers *)(void *)(memory->GetMemory() + 0xFF12),
 			*(sound_mode_2_registers *)(void *)(memory->GetMemory() + 0xFF16),
