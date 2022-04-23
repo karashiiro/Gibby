@@ -1,9 +1,17 @@
 #pragma once
 
+struct flag_register {
+	unsigned char : 4;
+	unsigned char c : 1;
+	unsigned char h : 1;
+	unsigned char n : 1;
+	unsigned char z : 1;
+};
+
 struct register_set {
 	union {
 		struct {
-			unsigned char f;
+			flag_register f;
 			unsigned char a;
 		};
 		unsigned short af;
@@ -31,14 +39,6 @@ struct register_set {
 	};
 	unsigned short sp;
 	unsigned short pc;
-};
-
-struct flag_register {
-	unsigned char : 4;
-	unsigned char c : 1;
-	unsigned char h : 1;
-	unsigned char n : 1;
-	unsigned char z : 1;
 };
 
 struct interrupt_register {
