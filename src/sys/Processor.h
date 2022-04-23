@@ -5,7 +5,7 @@
 class Processor
 {
 	/*
-	 * A simulation of a Sharp SM83.
+	 * A simulation of a Sharp LR35902.
 	 * References:
 	 * - https://www.copetti.org/writings/consoles/game-boy/
 	 * - http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf
