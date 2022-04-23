@@ -2,7 +2,7 @@
 
 Memory::Memory()
 {
-	mem = new unsigned char[0xFFFF];
+	mem = new unsigned char[0x10000];
 }
 
 Memory::~Memory()
