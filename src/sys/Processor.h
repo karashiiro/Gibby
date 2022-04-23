@@ -1,6 +1,8 @@
 #pragma once
 
 #include "registers.h"
+#include "CPU.h"
+#include "Memory.h"
 
 class Processor
 {
@@ -15,15 +17,6 @@ public:
 	Processor();
 	virtual ~Processor();
 private:
-	register_set registers{};
-	flag_register flags{};
-
-	/*
-	 * The SM83 only has 8KB of onboard RAM, but its memory
-	 * bus gives access to 64KB of RAM in total. Rather than
-	 * replicating the memory bus functionality in code, I'm
-	 * just pretending it's all a contiguous block (as it
-	 * appears to the CPU).
-	 */
-	unsigned char *mem;
+	Memory *memory;
+	CPU *cpu;
 };

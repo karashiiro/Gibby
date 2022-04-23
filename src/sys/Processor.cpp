@@ -2,10 +2,12 @@
 
 Processor::Processor()
 {
-	mem = new unsigned char[0xFFFF];
+	memory = new Memory();
+	cpu = new CPU(memory);
 }
 
 Processor::~Processor()
 {
-	delete[] mem;
+	delete cpu;
+	delete memory;
 }
