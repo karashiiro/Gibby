@@ -24,5 +24,5 @@ private:
 	CPU *cpu;
 	Timer *timer;
 	Graphics *ppu;
-	Audio*apu;
+	Audio *apu;
 };
