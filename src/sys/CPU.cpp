@@ -39,7 +39,7 @@ void CPU::ExecuteText(unsigned char* text)
 
 			// Try to jump to SET, RES, or BIT, and then extract bits 5:3
 			// to jump to one of the others if that fails.
-			unsigned char x = Extract<7, 5>(opcode2);
+			unsigned char x = Extract<7, 6>(opcode2);
 			switch (x)
 			{
 			case 3:
