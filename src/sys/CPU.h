@@ -8,7 +8,7 @@ class CPU
 public:
 	explicit CPU(Clock *external_clock, interrupt_register &mapped_register, unsigned char *external_memory);
 
-	void ExecuteText(unsigned char *text);
+	[[noreturn]] void ExecuteText(unsigned char *text);
 private:
 	void NOP();
 	void STOP();
@@ -81,6 +81,9 @@ private:
 	void BIT(unsigned char b, unsigned char &r);
 	void RES(unsigned char b, unsigned char &r);
 	void SET(unsigned char b, unsigned char &r);
+
+	// Helper functions
+	unsigned char& DecodeRegister(unsigned char r);
 
 	register_set registers{};
 	interrupt_register &interrupts;
