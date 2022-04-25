@@ -20,11 +20,11 @@ constexpr unsigned char Extract(T bitset)
 }
 
 [[noreturn]]
-void CPU::ExecuteText(unsigned char* text)
+void CPU::Execute()
 {
 	while (true)
 	{
-		auto opcode_1 = std::bitset<8>(text[registers.pc++]);
+		auto opcode_1 = std::bitset<8>(memory[registers.pc++]);
 		if (opcode_1.test(7))
 		{
 			if (opcode_1.test(6))
@@ -44,7 +44,7 @@ void CPU::ExecuteText(unsigned char* text)
 				case 6:
 					// 8-bit immediate arithmetic instructions
 					{
-						auto d8 = text[registers.pc++];
+						auto d8 = memory[registers.pc++];
 						switch (Extract<5, 3>(opcode_1))
 						{
 						case 7:
@@ -80,7 +80,7 @@ void CPU::ExecuteText(unsigned char* text)
 					{
 						if (opcode_1.test(3) && Extract<2, 0>(opcode_1) == 7)
 						{
-							unsigned short a16 = (text[registers.pc++] << 8) | (text[registers.pc++]);
+							unsigned short a16 = (memory[registers.pc++] << 8) | (memory[registers.pc++]);
 							CALL(a16);
 						}
 						else
@@ -96,7 +96,7 @@ void CPU::ExecuteText(unsigned char* text)
 					if (opcode_1.test(5))
 					{
 						unsigned char cond = Extract<4, 3>(opcode_1);
-						unsigned short a16 = (text[registers.pc++] << 8) | (text[registers.pc++]);
+						unsigned short a16 = (memory[registers.pc++] << 8) | (memory[registers.pc++]);
 						CALL(cond, a16);
 					}
 					break;
@@ -114,7 +114,7 @@ void CPU::ExecuteText(unsigned char* text)
 						case 1:
 							{
 								// Search for CB-prefixed opcode
-								auto opcode_2 = std::bitset<8>(text[registers.pc++]);
+								auto opcode_2 = std::bitset<8>(memory[registers.pc++]);
 
 								// Register is always in bits 2:0 in CB-prefixed opcodes
 								auto rn = Extract<2, 0>(opcode_2);
@@ -172,7 +172,7 @@ void CPU::ExecuteText(unsigned char* text)
 						case 0:
 						default:
 							{
-								unsigned short a16 = (text[registers.pc++] << 8) | (text[registers.pc++]);
+								unsigned short a16 = (memory[registers.pc++] << 8) | (memory[registers.pc++]);
 								JP(a16);
 							}
 							break;
@@ -186,32 +186,33 @@ void CPU::ExecuteText(unsigned char* text)
 						{
 							if (opcode_1.test(3))
 							{
-								unsigned short a16 = (text[registers.pc++] << 8) | (text[registers.pc++]);
+								unsigned short a16 = (memory[registers.pc++] << 8) | (memory[registers.pc++]);
 								if (opcode_1.test(4))
 								{
-									LD(registers.a, *(memory + a16));
+									LD(registers.a, *(memory + a16), 16);
 								}
 								else
 								{
-									LD(*(memory + a16), registers.a);
+									LD(*(memory + a16), registers.a, 16);
 								}
 							}
 							else
 							{
+								unsigned char &mem_c = *(memory + 0xFF00 + registers.c);
 								if (opcode_1.test(4))
 								{
-									LD(registers.a, registers.c);
+									LD(registers.a, mem_c, 8);
 								}
 								else
 								{
-									LD(registers.c, registers.a);
+									LD(mem_c, registers.a, 8);
 								}
 							}
 						}
 						else
 						{
 							auto cond = Extract<4, 3>(opcode_1);
-							unsigned short a16 = (text[registers.pc++] << 8) | (text[registers.pc++]);
+							unsigned short a16 = (memory[registers.pc++] << 8) | (memory[registers.pc++]);
 							JP(cond, a16);
 						}
 					}
@@ -224,7 +225,7 @@ void CPU::ExecuteText(unsigned char* text)
 							switch (Extract<5, 4>(opcode_1))
 							{
 							case 3:
-								LD(registers.sp, registers.hl);
+								LD(registers.sp, registers.hl, 8);
 								break;
 							case 2:
 								JP(registers.hl);
@@ -252,13 +253,13 @@ void CPU::ExecuteText(unsigned char* text)
 					{
 						if (opcode_1.test(5))
 						{
-							auto n = text[registers.pc++];
+							auto n = memory[registers.pc++];
 							switch (Extract<4, 3>(opcode_1))
 							{
 							case 3:
 								{
-									unsigned short sp = registers.sp + static_cast<char>(n);
-									LD(registers.hl, sp);
+									unsigned short sp_r8 = registers.sp + static_cast<char>(n);
+									LD(registers.hl, sp_r8, 12);
 								}
 								break;
 							case 2:
@@ -354,7 +355,7 @@ void CPU::ExecuteText(unsigned char* text)
 				{
 					auto &rd = DecodeRegister1(r1);
 					auto &rs = DecodeRegister1(r2);
-					LD(rd, rs);
+					LD(rd, rs, r1 == 6 || r2 == 6 ? 8 : 4);
 				}
 			}
 			else
@@ -420,8 +421,8 @@ void CPU::ExecuteText(unsigned char* text)
 					{
 						auto rn = Extract<5, 3>(opcode_1);
 						auto &rd = DecodeRegister1(rn);
-						auto d8 = text[registers.pc++];
-						LD(rd, d8);
+						auto d8 = memory[registers.pc++];
+						LD(rd, d8, 8);
 					}
 					break;
 				case 5:
@@ -462,11 +463,11 @@ void CPU::ExecuteText(unsigned char* text)
 						auto &r = DecodeRegister4(rn);
 						if (opcode_1.test(3))
 						{
-							LD(registers.a, r);
+							LD(registers.a, r, 8);
 						}
 						else
 						{
-							LD(r, registers.a);
+							LD(r, registers.a, 8);
 						}
 					}
 					break;
@@ -481,8 +482,8 @@ void CPU::ExecuteText(unsigned char* text)
 						}
 						else
 						{
-							unsigned short d16 = (text[registers.pc++] << 8) | (text[registers.pc++]);
-							LD(r, d16);
+							unsigned short d16 = (memory[registers.pc++] << 8) | (memory[registers.pc++]);
+							LD(r, d16, 12);
 						}
 					}
 					break;
@@ -494,14 +495,14 @@ void CPU::ExecuteText(unsigned char* text)
 					case 3:
 					case 2:
 						{
-							char r8 = static_cast<char>(text[registers.pc++]);
+							char r8 = static_cast<char>(memory[registers.pc++]);
 							JR(Extract<4, 3>(opcode_1), r8);
 						}
 						break;
 					case 1:
 						if (Extract<3, 0>(opcode_1) == 8)
 						{
-							char r8 = static_cast<char>(text[registers.pc++]);
+							char r8 = static_cast<char>(memory[registers.pc++]);
 							JR(r8);
 						}
 						else
@@ -513,8 +514,8 @@ void CPU::ExecuteText(unsigned char* text)
 					default:
 						if (Extract<3, 0>(opcode_1) == 8)
 						{
-							unsigned short a16 = (text[registers.pc++] << 8) | (text[registers.pc++]);
-							LD(*(unsigned short *)(memory + a16), registers.sp);
+							unsigned short a16 = (memory[registers.pc++] << 8) | (memory[registers.pc++]);
+							LD(*(unsigned short *)(memory + a16), registers.sp, 20);
 						}
 						else
 						{
@@ -603,4 +604,17 @@ unsigned char& CPU::DecodeRegister4(unsigned char rn)
 	default:
 		throw std::runtime_error("invalid register requested");
 	}
+}
+
+unsigned char& CPU::ReadMemory(unsigned short p)
+{
+	auto &v = memory[p];
+	clock->Wait(4);
+	return v;
+}
+
+void CPU::WriteMemory(unsigned short p, unsigned char v)
+{
+	memory[p] = v;
+	clock->Wait(4);
 }

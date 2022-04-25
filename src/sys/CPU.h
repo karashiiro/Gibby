@@ -8,19 +8,38 @@ class CPU
 public:
 	explicit CPU(Clock *external_clock, interrupt_register &mapped_register, unsigned char *external_memory);
 
-	[[noreturn]] void ExecuteText(unsigned char *text);
+	[[noreturn]] void Execute();
 private:
-	void NOP();
+	void NOP()
+	{
+		clock->Wait(4);
+	}
 	void STOP();
 
 	void JR(unsigned char cc, char r8);
-	void JR(char r8);
+	void JR(char r8)
+	{
+		registers.pc += r8;
+		clock->Wait(12);
+	}
 
 	void JP(unsigned char cc, unsigned short &n);
-	void JP(unsigned short &n);
+	void JP(unsigned short &n)
+	{
+		registers.pc = n;
+		clock->Wait(16);
+	}
 
-	void LD(unsigned char &d, unsigned char &s);
-	void LD(unsigned short &d, unsigned short &s);
+	void LD(unsigned char &d, unsigned char &s, int cycles)
+	{
+		d = s;
+		clock->Wait(cycles);
+	}
+	void LD(unsigned short &d, unsigned short &s, int cycles)
+	{
+		d = s;
+		clock->Wait(cycles);
+	}
 
 	void LDH(unsigned char &d, unsigned char &s);
 
@@ -87,6 +106,9 @@ private:
 	unsigned short& DecodeRegister2(unsigned char rn);
 	unsigned short& DecodeRegister3(unsigned char rn);
 	unsigned char& DecodeRegister4(unsigned char rn);
+
+	unsigned char& ReadMemory(unsigned short p);
+	void WriteMemory(unsigned short p, unsigned char v);
 
 	register_set registers{};
 	interrupt_register &interrupts;
