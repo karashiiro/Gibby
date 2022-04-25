@@ -14,10 +14,13 @@ private:
 	void STOP();
 
 	void JR(unsigned char cc, char r8);
+	void JR(char r8);
+
 	void JP(unsigned char cc, unsigned short &n);
+	void JP(unsigned short &n);
 
 	void LD(unsigned char &d, unsigned char &s);
-	void LD(unsigned short &rd, unsigned short &s);
+	void LD(unsigned short &d, unsigned short &s);
 
 	void LDI(unsigned char &rd, unsigned char &rs);
 	void LDD(unsigned char &rd, unsigned char &rs);
@@ -48,7 +51,7 @@ private:
 
 	void ADC(unsigned char &rd, unsigned char &n);
 	void SUB(unsigned char &n);
-	void SBC(unsigned char &n);
+	void SBC(unsigned char &rd, unsigned char &n);
 	void AND(unsigned char &n);
 	void XOR(unsigned char &n);
 	void OR(unsigned char &n);
@@ -83,7 +86,10 @@ private:
 	void SET(unsigned char b, unsigned char &r);
 
 	// Helper functions
-	unsigned char& DecodeRegister(unsigned char r);
+	unsigned char& DecodeRegister1(unsigned char rn);
+	unsigned short& DecodeRegister2(unsigned char rn);
+	unsigned short& DecodeRegister3(unsigned char rn);
+	unsigned char& DecodeRegister4(unsigned char rn);
 
 	register_set registers{};
 	interrupt_register &interrupts;
