@@ -22,9 +22,6 @@ private:
 	void LD(unsigned char &d, unsigned char &s);
 	void LD(unsigned short &d, unsigned short &s);
 
-	void LDI(unsigned char &rd, unsigned char &rs);
-	void LDD(unsigned char &rd, unsigned char &rs);
-
 	void LDH(unsigned char &d, unsigned char &s);
 
 	void INC(unsigned short &rd);
