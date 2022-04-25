@@ -14,9 +14,12 @@ Clock::~Clock()
 	shutdown = true;
 }
 
-void Clock::Wait()
+void Clock::Wait(int cycles)
 {
-	std::unique_lock lock(state);
+	for (auto i = 0; i < cycles; i++)
+	{
+		std::unique_lock lock(state);
+	}
 }
 
 void Clock::Start()

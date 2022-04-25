@@ -8,7 +8,7 @@ public:
 	Clock();
 	virtual ~Clock();
 
-	void Wait();
+	void Wait(int cycles);
 private:
 	void Start();
 
