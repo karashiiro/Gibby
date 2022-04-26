@@ -2,46 +2,41 @@
 
 #include "cpu_registers.h"
 #include "Clock.h"
+#include "Memory.h"
 
 class CPU
 {
 public:
-	explicit CPU(Clock *external_clock, interrupt_register &mapped_register, unsigned char *external_memory);
+	explicit CPU(Clock *external_clock, interrupt_register &mapped_register, Memory *external_memory);
 
 	[[noreturn]] void Execute();
 private:
-	void NOP()
+	void NOP() {}
+	void STOP()
 	{
-		clock->Wait(4);
+		registers.pc++;
 	}
-	void STOP();
 
 	void JR(unsigned char cc, char r8);
 	void JR(char r8)
 	{
 		registers.pc += r8;
-		clock->Wait(12);
 	}
 
-	void JP(unsigned char cc, unsigned short &n);
-	void JP(unsigned short &n)
+	void JP(unsigned char cc, unsigned short n);
+	void JP(unsigned short n)
 	{
 		registers.pc = n;
-		clock->Wait(16);
 	}
 
-	void LD(unsigned char &d, unsigned char &s, int cycles)
+	void LD(unsigned char &d, unsigned char s)
 	{
 		d = s;
-		clock->Wait(cycles);
 	}
-	void LD(unsigned short &d, unsigned short &s, int cycles)
+	void LD(unsigned short &d, unsigned short s)
 	{
 		d = s;
-		clock->Wait(cycles);
 	}
-
-	void LDH(unsigned char &d, unsigned char &s);
 
 	void INC(unsigned short &rd);
 	void INC(unsigned char &rd);
@@ -61,19 +56,19 @@ private:
 
 	void HALT();
 
-	void ADD(unsigned short &rd, unsigned short &rs);
-	void ADD(unsigned char &rd, unsigned char &n);
+	void ADD(unsigned short &rd, unsigned short rs);
+	void ADD(unsigned char &rd, unsigned char n);
 	void ADD(unsigned short &sp, char r8);
 
-	void ADC(unsigned char &rd, unsigned char &n);
-	void SUB(unsigned char &n);
-	void SBC(unsigned char &rd, unsigned char &n);
-	void AND(unsigned char &n);
-	void XOR(unsigned char &n);
-	void OR(unsigned char &n);
-	void CP(unsigned char &n);
+	void ADC(unsigned char &rd, unsigned char n);
+	void SUB(unsigned char n);
+	void SBC(unsigned char &rd, unsigned char n);
+	void AND(unsigned char n);
+	void XOR(unsigned char n);
+	void OR(unsigned char n);
+	void CP(unsigned char n);
 
-	void PUSH(unsigned short &rs);
+	void PUSH(unsigned short rs);
 	void POP(unsigned short &rd);
 
 	void DI();
@@ -90,16 +85,16 @@ private:
 
 	// CB-prefixed opcodes
 	void RLC(unsigned char &rd);
-	void RRC(unsigned char &r)d;
+	void RRC(unsigned char &rd);
 	void RL(unsigned char &rd);
 	void RR(unsigned char &rd);
 	void SLA(unsigned char &rd);
 	void SRA(unsigned char &rd);
 	void SWAP(unsigned char &rd);
 	void SRL(unsigned char &rd);
-	void BIT(unsigned char b, unsigned char &r);
-	void RES(unsigned char b, unsigned char &r);
-	void SET(unsigned char b, unsigned char &r);
+	void BIT(unsigned char b, unsigned char &rd);
+	void RES(unsigned char b, unsigned char &rd);
+	void SET(unsigned char b, unsigned char &rd);
 
 	// Helper functions
 	unsigned char& DecodeRegister1(unsigned char rn);
@@ -107,12 +102,9 @@ private:
 	unsigned short& DecodeRegister3(unsigned char rn);
 	unsigned char& DecodeRegister4(unsigned char rn);
 
-	unsigned char& ReadMemory(unsigned short p);
-	void WriteMemory(unsigned short p, unsigned char v);
-
 	register_set registers{};
 	interrupt_register &interrupts;
 
 	Clock *clock;
-	unsigned char *memory;
+	Memory *memory;
 };

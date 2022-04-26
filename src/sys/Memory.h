@@ -1,12 +1,19 @@
 #pragma once
 
+#include "Clock.h"
+
 class Memory
 {
+	// Used for casting references over regions of memory for
+	// mapped sections that would normally be in other devices
+	friend class Processor;
 public:
-	Memory();
+	explicit Memory(Clock *external_clock);
 	virtual ~Memory();
 
-	unsigned char* GetMemory();
+	unsigned char ReadMemory(unsigned short p);
+	unsigned char& ReadMemoryRef(unsigned short p);
+	void WriteMemory(unsigned short p, unsigned char v);
 private:
 	/*
 	 * The SM83 only has 8KB of onboard RAM, but its memory
@@ -16,4 +23,6 @@ private:
 	 * appears to the CPU).
 	 */
 	unsigned char *mem;
+
+	Clock *clock;
 };
