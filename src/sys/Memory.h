@@ -11,9 +11,9 @@ public:
 	explicit Memory(Clock *external_clock);
 	virtual ~Memory();
 
-	unsigned char ReadMemory(unsigned short p);
-	unsigned char& ReadMemoryRef(unsigned short p);
-	void WriteMemory(unsigned short p, unsigned char v);
+	unsigned char ReadByte(unsigned short p);
+	unsigned char& ReadByteRef(unsigned short p);
+	void WriteByte(unsigned short p, unsigned char v);
 private:
 	/*
 	 * The SM83 only has 8KB of onboard RAM, but its memory

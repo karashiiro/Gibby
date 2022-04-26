@@ -14,6 +14,7 @@ private:
 	void NOP() {}
 	void STOP()
 	{
+		// TODO
 		registers.pc++;
 	}
 
@@ -21,19 +22,26 @@ private:
 	void JR(char r8)
 	{
 		registers.pc += r8;
+		clock->Wait(4);
 	}
 
 	void JP(unsigned char cc, unsigned short n);
 	void JP(unsigned short n)
 	{
 		registers.pc = n;
+		clock->Wait(4);
 	}
 
-	void LD(unsigned char &d, unsigned char s)
+	void JPHL()
+	{
+		registers.pc = registers.hl;
+	}
+
+	static void LD(unsigned char &d, unsigned char s)
 	{
 		d = s;
 	}
-	void LD(unsigned short &d, unsigned short s)
+	static void LD(unsigned short &d, unsigned short s)
 	{
 		d = s;
 	}
@@ -57,16 +65,88 @@ private:
 	void HALT();
 
 	void ADD(unsigned short &rd, unsigned short rs);
-	void ADD(unsigned char &rd, unsigned char n);
+	void ADD(unsigned char n)
+	{
+		unsigned char m = n + registers.f.c;
+		unsigned char s_lo = (registers.a & 0x0F) + ~(m & 0x0F) + 1;
+		unsigned char half_carry = (s_lo & 0x10) >> 4;
+		unsigned short result = registers.a + m;
+		registers.a = result;
+		registers.f.z = registers.a == 0;
+		registers.f.n = 0;
+		registers.f.h = half_carry;
+		registers.f.c = result & 0x0100 >> 8;
+	}
 	void ADD(unsigned short &sp, char r8);
 
-	void ADC(unsigned char &rd, unsigned char n);
-	void SUB(unsigned char n);
-	void SBC(unsigned char &rd, unsigned char n);
-	void AND(unsigned char n);
-	void XOR(unsigned char n);
-	void OR(unsigned char n);
-	void CP(unsigned char n);
+	void ADC(unsigned char n)
+	{
+		unsigned char m = n + registers.f.c;
+		unsigned char s_lo = (registers.a & 0x0F) + ~(m & 0x0F) + 1;
+		unsigned char half_carry = (s_lo & 0x10) >> 4;
+		unsigned short result = registers.a + m;
+		registers.a = result;
+		registers.f.z = registers.a == 0;
+		registers.f.n = 0;
+		registers.f.h = half_carry;
+		registers.f.c = result & 0x0100 >> 8;
+	}
+	void SUB(unsigned char n)
+	{
+		unsigned char s_lo = (registers.a & 0x0F) + ~(n & 0x0F) + 1;
+		unsigned char half_carry = (s_lo & 0x10) >> 4;
+		unsigned short result = registers.a + ~n + 1;
+		registers.a = result;
+		registers.f.z = registers.a == 0;
+		registers.f.n = 1;
+		registers.f.h = half_carry;
+		registers.f.c = result & 0x0100 >> 8;
+	}
+	void SBC(unsigned char n)
+	{
+		unsigned char m = n + registers.f.c;
+		unsigned char s_lo = (registers.a & 0x0F) + ~(m & 0x0F) + 1;
+		unsigned char half_carry = (s_lo & 0x10) >> 4;
+		unsigned short result = registers.a + ~m + 1;
+		registers.a = result;
+		registers.f.z = registers.a == 0;
+		registers.f.n = 1;
+		registers.f.h = half_carry;
+		registers.f.c = result & 0x0100 >> 8;
+	}
+	void AND(unsigned char n)
+	{
+		registers.a &= n;
+		registers.f.z = registers.a == 0;
+		registers.f.n = 0;
+		registers.f.h = 1;
+		registers.f.c = 0;
+	}
+	void XOR(unsigned char n)
+	{
+		registers.a ^= n;
+		registers.f.z = registers.a == 0;
+		registers.f.n = 0;
+		registers.f.h = 0;
+		registers.f.c = 0;
+	}
+	void OR(unsigned char n)
+	{
+		registers.a |= n;
+		registers.f.z = registers.a == 0;
+		registers.f.n = 0;
+		registers.f.h = 0;
+		registers.f.c = 0;
+	}
+	void CP(unsigned char n)
+	{
+		unsigned char s_lo = (registers.a & 0x0F) + ~(n & 0x0F) + 1;
+		unsigned char half_carry = (s_lo & 0x10) >> 4;
+		registers.f.z = registers.a == n;
+		registers.f.n = 1;
+		registers.f.h = half_carry;
+		registers.f.c = registers.a < n;
+	}
 
 	void PUSH(unsigned short rs);
 	void POP(unsigned short &rd);

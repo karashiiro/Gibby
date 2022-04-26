@@ -24,7 +24,7 @@ void CPU::Execute()
 {
 	while (true)
 	{
-		auto opcode_1 = std::bitset<8>(memory->ReadMemory(registers.pc++));
+		auto opcode_1 = std::bitset<8>(memory->ReadByte(registers.pc++));
 		if (opcode_1.test(7))
 		{
 			if (opcode_1.test(6))
@@ -44,7 +44,7 @@ void CPU::Execute()
 				case 6:
 					// 8-bit immediate arithmetic instructions
 					{
-						auto d8 = memory->ReadMemory(registers.pc++);
+						auto d8 = memory->ReadByte(registers.pc++);
 						switch (Extract<5, 3>(opcode_1))
 						{
 						case 7:
@@ -60,17 +60,17 @@ void CPU::Execute()
 							AND(d8);
 							break;
 						case 3:
-							SBC(registers.a, d8);
+							SBC(d8);
 							break;
 						case 2:
 							SUB(d8);
 							break;
 						case 1:
-							ADC(registers.a, d8);
+							ADC(d8);
 							break;
 						case 0:
 						default:
-							ADD(registers.a, d8);
+							ADD(d8);
 							break;
 						}
 					}
@@ -80,7 +80,7 @@ void CPU::Execute()
 					{
 						if (opcode_1.test(3) && Extract<2, 0>(opcode_1) == 7)
 						{
-							unsigned short a16 = (memory->ReadMemory(registers.pc++) << 8) | (memory->ReadMemory(registers.pc++));
+							unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
 							CALL(a16);
 						}
 						else
@@ -96,7 +96,7 @@ void CPU::Execute()
 					if (opcode_1.test(5))
 					{
 						unsigned char cond = Extract<4, 3>(opcode_1);
-						unsigned short a16 = (memory->ReadMemory(registers.pc++) << 8) | (memory->ReadMemory(registers.pc++));
+						unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
 						CALL(cond, a16);
 					}
 					break;
@@ -114,7 +114,7 @@ void CPU::Execute()
 						case 1:
 							{
 								// Search for CB-prefixed opcode
-								auto opcode_2 = std::bitset<8>(memory->ReadMemory(registers.pc++));
+								auto opcode_2 = std::bitset<8>(memory->ReadByte(registers.pc++));
 
 								// Register is always in bits 2:0 in CB-prefixed opcodes
 								auto rn = Extract<2, 0>(opcode_2);
@@ -172,7 +172,7 @@ void CPU::Execute()
 						case 0:
 						default:
 							{
-								unsigned short a16 = (memory->ReadMemory(registers.pc++) << 8) | (memory->ReadMemory(registers.pc++));
+								unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
 								JP(a16);
 							}
 							break;
@@ -186,8 +186,8 @@ void CPU::Execute()
 						{
 							if (opcode_1.test(3))
 							{
-								unsigned short a16 = (memory->ReadMemory(registers.pc++) << 8) | (memory->ReadMemory(registers.pc++));
-								auto &mem_a16 = memory->ReadMemoryRef(a16);
+								unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
+								auto &mem_a16 = memory->ReadByteRef(a16);
 								if (opcode_1.test(4))
 								{
 									LD(registers.a, mem_a16);
@@ -199,7 +199,7 @@ void CPU::Execute()
 							}
 							else
 							{
-								auto &mem_c = memory->ReadMemoryRef(0xFF00 + registers.c);
+								auto &mem_c = memory->ReadByteRef(0xFF00 + registers.c);
 								if (opcode_1.test(4))
 								{
 									LD(registers.a, mem_c);
@@ -213,13 +213,13 @@ void CPU::Execute()
 						else
 						{
 							auto cond = Extract<4, 3>(opcode_1);
-							unsigned short a16 = (memory->ReadMemory(registers.pc++) << 8) | (memory->ReadMemory(registers.pc++));
+							unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
 							JP(cond, a16);
 						}
 					}
 					break;
 				case 1:
-					// pop, ret, jump, ld
+					// pop, ret, jp hl, ld
 					{
 						if (opcode_1.test(3))
 						{
@@ -227,9 +227,10 @@ void CPU::Execute()
 							{
 							case 3:
 								LD(registers.sp, registers.hl);
+								clock->Wait(4);
 								break;
 							case 2:
-								JP(registers.hl);
+								JPHL();
 								break;
 							case 1:
 								RETI();
@@ -258,7 +259,7 @@ void CPU::Execute()
 							{
 							case 3:
 								{
-									auto r8 = static_cast<char>(memory->ReadMemory(registers.pc++));
+									auto r8 = static_cast<char>(memory->ReadByte(registers.pc++));
 									auto sp_r8 = registers.sp + r8;
 									clock->Wait(4);
 									LD(registers.hl, sp_r8);
@@ -266,22 +267,22 @@ void CPU::Execute()
 								break;
 							case 2:
 								{
-									auto a8 = memory->ReadMemory(registers.pc++);
-									auto mem_a8 = memory->ReadMemory(0xFF00 + a8);
+									auto a8 = memory->ReadByte(registers.pc++);
+									auto mem_a8 = memory->ReadByte(0xFF00 + a8);
 									LD(registers.a, mem_a8);
 								}
 								break;
 							case 1:
 								{
-									auto r8 = static_cast<char>(memory->ReadMemory(registers.pc++));
+									auto r8 = static_cast<char>(memory->ReadByte(registers.pc++));
 									ADD(registers.sp, r8);
 								}
 								break;
 							case 0:
 							default:
 								{
-									auto a8 = memory->ReadMemory(registers.pc++);
-									auto &mem_a8 = memory->ReadMemoryRef(0xFF00 + a8);
+									auto a8 = memory->ReadByte(registers.pc++);
+									auto &mem_a8 = memory->ReadByteRef(0xFF00 + a8);
 									LD(mem_a8, registers.a);
 								}
 								break;
@@ -332,7 +333,7 @@ void CPU::Execute()
 					{
 						if (opcode_1.test(3))
 						{
-							SBC(registers.a, rs);
+							SBC(rs);
 						}
 						else
 						{
@@ -343,11 +344,11 @@ void CPU::Execute()
 					{
 						if (opcode_1.test(3))
 						{
-							ADC(registers.a, rs);
+							ADC(rs);
 						}
 						else
 						{
-							ADD(registers.a, rs);
+							ADD(rs);
 						}
 					}
 				}
@@ -434,7 +435,7 @@ void CPU::Execute()
 					{
 						auto rn = Extract<5, 3>(opcode_1);
 						auto &rd = DecodeRegister1(rn);
-						auto d8 = memory->ReadMemory(registers.pc++);
+						auto d8 = memory->ReadByte(registers.pc++);
 						LD(rd, d8);
 					}
 					break;
@@ -495,7 +496,7 @@ void CPU::Execute()
 						}
 						else
 						{
-							unsigned short d16 = (memory->ReadMemory(registers.pc++) << 8) | (memory->ReadMemory(registers.pc++));
+							unsigned short d16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
 							LD(r, d16);
 						}
 					}
@@ -508,14 +509,14 @@ void CPU::Execute()
 					case 3:
 					case 2:
 						{
-							char r8 = static_cast<char>(memory->ReadMemory(registers.pc++));
+							char r8 = static_cast<char>(memory->ReadByte(registers.pc++));
 							JR(Extract<4, 3>(opcode_1), r8);
 						}
 						break;
 					case 1:
-						if (Extract<3, 0>(opcode_1) == 8)
+						if (opcode_1.test(3))
 						{
-							char r8 = static_cast<char>(memory->ReadMemory(registers.pc++));
+							char r8 = static_cast<char>(memory->ReadByte(registers.pc++));
 							JR(r8);
 						}
 						else
@@ -525,12 +526,13 @@ void CPU::Execute()
 						break;
 					case 0:
 					default:
-						if (Extract<3, 0>(opcode_1) == 8)
+						if (opcode_1.test(3))
 						{
-							unsigned short a16 = (memory->ReadMemory(registers.pc++) << 8) | (memory->ReadMemory(registers.pc++));
-							unsigned char mem_a16 = memory->ReadMemory(a16);
-							LD(mem_a16, registers.sp);
-							memory->WriteMemory(a16, mem_a16);
+							unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
+							unsigned short v = 0;
+							LD(v, registers.sp);
+							memory->WriteByte(a16, v & 0x00ff);
+							memory->WriteByte(a16 + 1, v >> 8);
 						}
 						else
 						{
@@ -562,7 +564,7 @@ unsigned char& CPU::DecodeRegister1(unsigned char rn)
 	case 5:
 		return registers.l;
 	case 6:
-		return memory->ReadMemoryRef(registers.hl);
+		return memory->ReadByteRef(registers.hl);
 	case 7:
 		return registers.a;
 	default:
@@ -609,13 +611,13 @@ unsigned char& CPU::DecodeRegister4(unsigned char rn)
 	switch (rn)
 	{
 	case 0:
-		return memory->ReadMemoryRef(registers.bc);
+		return memory->ReadByteRef(registers.bc);
 	case 1:
-		return memory->ReadMemoryRef(registers.de);
+		return memory->ReadByteRef(registers.de);
 	case 2:
-		return memory->ReadMemoryRef(registers.hl++);
+		return memory->ReadByteRef(registers.hl++);
 	case 3:
-		return memory->ReadMemoryRef(registers.hl--);
+		return memory->ReadByteRef(registers.hl--);
 	default:
 		throw std::runtime_error("invalid register requested");
 	}
