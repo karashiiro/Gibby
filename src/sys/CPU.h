@@ -11,6 +11,8 @@ public:
 
 	[[noreturn]] void Execute();
 private:
+	void ExecuteCB();
+
 	void NOP() {}
 	void STOP()
 	{
@@ -192,6 +194,9 @@ private:
 	unsigned short& DecodeRegister2(unsigned char rn);
 	unsigned short& DecodeRegister3(unsigned char rn);
 	unsigned char& DecodeRegister4(unsigned char rn);
+
+	unsigned short ReadImm8();
+	unsigned short ReadImm16();
 
 	register_set registers{};
 	interrupt_register &interrupts;

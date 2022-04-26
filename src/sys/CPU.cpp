@@ -24,7 +24,7 @@ void CPU::Execute()
 {
 	while (true)
 	{
-		auto opcode_1 = std::bitset<8>(memory->ReadByte(registers.pc++));
+		auto opcode_1 = std::bitset<8>(ReadImm8());
 		if (opcode_1.test(7))
 		{
 			if (opcode_1.test(6))
@@ -44,7 +44,7 @@ void CPU::Execute()
 				case 6:
 					// 8-bit immediate arithmetic instructions
 					{
-						auto d8 = memory->ReadByte(registers.pc++);
+						auto d8 = ReadImm8();
 						switch (Extract<5, 3>(opcode_1))
 						{
 						case 7:
@@ -80,7 +80,7 @@ void CPU::Execute()
 					{
 						if (opcode_1.test(3) && Extract<2, 0>(opcode_1) == 7)
 						{
-							unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
+							unsigned short a16 = ReadImm16();
 							CALL(a16);
 						}
 						else
@@ -96,7 +96,7 @@ void CPU::Execute()
 					if (opcode_1.test(5))
 					{
 						unsigned char cond = Extract<4, 3>(opcode_1);
-						unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
+						unsigned short a16 = ReadImm16();
 						CALL(cond, a16);
 					}
 					break;
@@ -112,67 +112,12 @@ void CPU::Execute()
 							DI();
 							break;
 						case 1:
-							{
-								// Search for CB-prefixed opcode
-								auto opcode_2 = std::bitset<8>(memory->ReadByte(registers.pc++));
-
-								// Register is always in bits 2:0 in CB-prefixed opcodes
-								auto rn = Extract<2, 0>(opcode_2);
-								auto &rd = DecodeRegister1(rn);
-
-								// BIT, RES, and SET all have the selected bit stored in bits 5:3
-								auto bit = Extract<5, 3>(opcode_2);
-
-								// Try to jump to SET, RES, or BIT, and then extract bits 5:3
-								// to jump to one of the others if that fails.
-								switch (Extract<7, 6>(opcode_2))
-								{
-								case 3:
-									SET(bit, rd);
-									break;
-								case 2:
-									RES(bit, rd);
-									break;
-								case 1:
-									BIT(bit, rd);
-									break;
-								case 0:
-								default:
-									switch (Extract<5, 3>(opcode_2))
-									{
-									case 7:
-										SRL(rd);
-										break;
-									case 6:
-										SWAP(rd);
-										break;
-									case 5:
-										SRA(rd);
-										break;
-									case 4:
-										SLA(rd);
-										break;
-									case 3:
-										RR(rd);
-										break;
-									case 2:
-										RL(rd);
-										break;
-									case 1:
-										RRC(rd);
-										break;
-									case 0:
-									default:
-										RLC(rd);
-										break;
-									}
-								}
-							}
+							ExecuteCB();
 							break;
 						case 0:
 						default:
 							{
-								unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
+								unsigned short a16 = ReadImm16();
 								JP(a16);
 							}
 							break;
@@ -186,7 +131,7 @@ void CPU::Execute()
 						{
 							if (opcode_1.test(3))
 							{
-								unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
+								unsigned short a16 = ReadImm16();
 								auto &mem_a16 = memory->ReadByteRef(a16);
 								if (opcode_1.test(4))
 								{
@@ -213,7 +158,7 @@ void CPU::Execute()
 						else
 						{
 							auto cond = Extract<4, 3>(opcode_1);
-							unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
+							unsigned short a16 = ReadImm16();
 							JP(cond, a16);
 						}
 					}
@@ -259,7 +204,7 @@ void CPU::Execute()
 							{
 							case 3:
 								{
-									auto r8 = static_cast<char>(memory->ReadByte(registers.pc++));
+									auto r8 = static_cast<char>(ReadImm8());
 									auto sp_r8 = registers.sp + r8;
 									clock->Wait(4);
 									LD(registers.hl, sp_r8);
@@ -267,21 +212,21 @@ void CPU::Execute()
 								break;
 							case 2:
 								{
-									auto a8 = memory->ReadByte(registers.pc++);
+									auto a8 = ReadImm8();
 									auto mem_a8 = memory->ReadByte(0xFF00 + a8);
 									LD(registers.a, mem_a8);
 								}
 								break;
 							case 1:
 								{
-									auto r8 = static_cast<char>(memory->ReadByte(registers.pc++));
+									auto r8 = static_cast<char>(ReadImm8());
 									ADD(registers.sp, r8);
 								}
 								break;
 							case 0:
 							default:
 								{
-									auto a8 = memory->ReadByte(registers.pc++);
+									auto a8 = ReadImm8();
 									auto &mem_a8 = memory->ReadByteRef(0xFF00 + a8);
 									LD(mem_a8, registers.a);
 								}
@@ -435,7 +380,7 @@ void CPU::Execute()
 					{
 						auto rn = Extract<5, 3>(opcode_1);
 						auto &rd = DecodeRegister1(rn);
-						auto d8 = memory->ReadByte(registers.pc++);
+						auto d8 = ReadImm8();
 						LD(rd, d8);
 					}
 					break;
@@ -496,7 +441,7 @@ void CPU::Execute()
 						}
 						else
 						{
-							unsigned short d16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
+							unsigned short d16 = ReadImm16();
 							LD(r, d16);
 						}
 					}
@@ -509,14 +454,14 @@ void CPU::Execute()
 					case 3:
 					case 2:
 						{
-							char r8 = static_cast<char>(memory->ReadByte(registers.pc++));
+							char r8 = static_cast<char>(ReadImm8());
 							JR(Extract<4, 3>(opcode_1), r8);
 						}
 						break;
 					case 1:
 						if (opcode_1.test(3))
 						{
-							char r8 = static_cast<char>(memory->ReadByte(registers.pc++));
+							char r8 = static_cast<char>(ReadImm8());
 							JR(r8);
 						}
 						else
@@ -528,7 +473,7 @@ void CPU::Execute()
 					default:
 						if (opcode_1.test(3))
 						{
-							unsigned short a16 = (memory->ReadByte(registers.pc++) << 8) | (memory->ReadByte(registers.pc++));
+							unsigned short a16 = ReadImm16();
 							unsigned short v = 0;
 							LD(v, registers.sp);
 							memory->WriteByte(a16, v & 0x00ff);
@@ -543,6 +488,64 @@ void CPU::Execute()
 					break;
 				}
 			}
+		}
+	}
+}
+
+void CPU::ExecuteCB()
+{
+	// Search for CB-prefixed opcode
+	auto opcode = std::bitset<8>(ReadImm8());
+
+	// Register is always in bits 2:0 in CB-prefixed opcodes
+	auto rn = Extract<2, 0>(opcode);
+	auto &rd = DecodeRegister1(rn);
+
+	// BIT, RES, and SET all have the selected bit stored in bits 5:3
+	auto bit = Extract<5, 3>(opcode);
+
+	// Try to jump to SET, RES, or BIT, and then extract bits 5:3
+	// to jump to one of the others if that fails.
+	switch (Extract<7, 6>(opcode))
+	{
+	case 3:
+		SET(bit, rd);
+		break;
+	case 2:
+		RES(bit, rd);
+		break;
+	case 1:
+		BIT(bit, rd);
+		break;
+	case 0:
+	default:
+		switch (Extract<5, 3>(opcode))
+		{
+		case 7:
+			SRL(rd);
+			break;
+		case 6:
+			SWAP(rd);
+			break;
+		case 5:
+			SRA(rd);
+			break;
+		case 4:
+			SLA(rd);
+			break;
+		case 3:
+			RR(rd);
+			break;
+		case 2:
+			RL(rd);
+			break;
+		case 1:
+			RRC(rd);
+			break;
+		case 0:
+		default:
+			RLC(rd);
+			break;
 		}
 	}
 }
@@ -621,4 +624,14 @@ unsigned char& CPU::DecodeRegister4(unsigned char rn)
 	default:
 		throw std::runtime_error("invalid register requested");
 	}
+}
+
+unsigned short CPU::ReadImm8()
+{
+	return memory->ReadByte(registers.pc++);
+}
+
+unsigned short CPU::ReadImm16()
+{
+	return (ReadImm8() << 8) | ReadImm8();
 }
