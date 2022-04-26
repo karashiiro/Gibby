@@ -172,9 +172,20 @@ private:
 	void SRA(unsigned char &rd);
 	void SWAP(unsigned char &rd);
 	void SRL(unsigned char &rd);
-	void BIT(unsigned char b, unsigned char &rd);
-	void RES(unsigned char b, unsigned char &rd);
-	void SET(unsigned char b, unsigned char &rd);
+	void BIT(unsigned char b, unsigned char &rd)
+	{
+		registers.f.z = (rd & (1 << b)) >> b;
+		registers.f.n = 0;
+		registers.f.h = 1;
+	}
+	static void RES(unsigned char b, unsigned char &rd)
+	{
+		rd = rd & ~(1 << b);
+	}
+	static void SET(unsigned char b, unsigned char &rd)
+	{
+		rd = rd | (1 << b);
+	}
 
 	// Helper functions
 	unsigned char& DecodeRegister1(unsigned char rn);
