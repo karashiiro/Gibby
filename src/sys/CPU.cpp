@@ -187,7 +187,7 @@ void CPU::Execute()
 							if (opcode_1.test(3))
 							{
 								unsigned short a16 = (memory->ReadMemory(registers.pc++) << 8) | (memory->ReadMemory(registers.pc++));
-								unsigned char mem_a16 = memory->ReadMemory(a16);
+								auto &mem_a16 = memory->ReadMemoryRef(a16);
 								if (opcode_1.test(4))
 								{
 									LD(registers.a, mem_a16);
@@ -199,7 +199,7 @@ void CPU::Execute()
 							}
 							else
 							{
-								unsigned char mem_c = memory->ReadMemory(0xFF00 + registers.c);
+								auto &mem_c = memory->ReadMemoryRef(0xFF00 + registers.c);
 								if (opcode_1.test(4))
 								{
 									LD(registers.a, mem_c);
@@ -259,7 +259,7 @@ void CPU::Execute()
 							case 3:
 								{
 									auto r8 = static_cast<char>(memory->ReadMemory(registers.pc++));
-									unsigned short sp_r8 = registers.sp + r8;
+									auto sp_r8 = registers.sp + r8;
 									clock->Wait(4);
 									LD(registers.hl, sp_r8);
 								}
@@ -267,8 +267,8 @@ void CPU::Execute()
 							case 2:
 								{
 									auto a8 = memory->ReadMemory(registers.pc++);
-									auto &mem_a8 = memory->ReadMemoryRef(0xFF00 + a8);
-									LD(registers.a, a8);
+									auto mem_a8 = memory->ReadMemory(0xFF00 + a8);
+									LD(registers.a, mem_a8);
 								}
 								break;
 							case 1:
