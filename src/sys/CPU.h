@@ -26,30 +26,26 @@ private:
 		std::bitset<2> flags(cc);
 		if (flags.test(0) && registers.f.n)
 		{
-			clock->Wait(8);
 			return;
 		}
 
 		if (!flags.test(0) && !registers.f.n)
 		{
-			clock->Wait(8);
 			return;
 		}
 
 		if (flags.test(1) && !registers.f.c)
 		{
-			clock->Wait(8);
 			return;
 		}
 
 		if (!flags.test(1) && !registers.f.z)
 		{
-			clock->Wait(8);
 			return;
 		}
 
 		registers.pc += r8;
-		clock->Wait(12);
+		clock->Wait(4);
 	}
 	void JR(char r8)
 	{
@@ -57,7 +53,32 @@ private:
 		clock->Wait(4);
 	}
 
-	void JP(unsigned char cc, unsigned short n);
+	void JP(unsigned char cc, unsigned short n)
+	{
+		std::bitset<2> flags(cc);
+		if (flags.test(0) && registers.f.n)
+		{
+			return;
+		}
+
+		if (!flags.test(0) && !registers.f.n)
+		{
+			return;
+		}
+
+		if (flags.test(1) && !registers.f.c)
+		{
+			return;
+		}
+
+		if (!flags.test(1) && !registers.f.z)
+		{
+			return;
+		}
+
+		registers.pc = n;
+		clock->Wait(4);
+	}
 	void JP(unsigned short n)
 	{
 		registers.pc = n;
