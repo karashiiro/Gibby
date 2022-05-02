@@ -24,7 +24,13 @@ private:
 	void JR(unsigned char cc, char r8)
 	{
 		std::bitset<2> flags(cc);
-		if (flags.test(0) && !registers.f.n)
+		if (flags.test(0) && registers.f.n)
+		{
+			clock->Wait(8);
+			return;
+		}
+
+		if (!flags.test(0) && !registers.f.n)
 		{
 			clock->Wait(8);
 			return;
