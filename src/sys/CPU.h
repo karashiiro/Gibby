@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bitset>
 #include "cpu_registers.h"
 #include "Clock.h"
 #include "Memory.h"
@@ -20,7 +21,30 @@ private:
 		registers.pc++;
 	}
 
-	void JR(unsigned char cc, char r8);
+	void JR(unsigned char cc, char r8)
+	{
+		std::bitset<2> flags(cc);
+		if (flags.test(0) && !registers.f.n)
+		{
+			clock->Wait(8);
+			return;
+		}
+
+		if (flags.test(1) && !registers.f.c)
+		{
+			clock->Wait(8);
+			return;
+		}
+
+		if (!flags.test(1) && !registers.f.z)
+		{
+			clock->Wait(8);
+			return;
+		}
+
+		registers.pc += r8;
+		clock->Wait(12);
+	}
 	void JR(char r8)
 	{
 		registers.pc += r8;
